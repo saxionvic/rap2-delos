@@ -5,9 +5,10 @@ import Pagination from './utils/pagination'
 import { User, Organization, Repository, Module, Interface, Property, QueryInclude, Logger } from '../models'
 import { Sequelize } from 'sequelize-typescript'
 import Tree from './utils/tree'
-import { AccessUtils, ACCESS_TYPE } from './utils/access';
+import { AccessUtils, ACCESS_TYPE } from './utils/access'
 import * as Consts from './utils/const'
 import RedisService, { CACHE_KEY } from '../service/redis'
+import MigrateService from '../service/migrate';
 
 const { initRepository, initModule } = require('./utils/helper')
 const Op = Sequelize.Op
@@ -380,7 +381,7 @@ router.get('/module/get', async (ctx) => {
 router.post('/module/create', async (ctx, next) => {
   let creatorId = ctx.session.id
   let body = Object.assign(ctx.request.body, { creatorId })
-  body.priority = (await Module.count()) + 1
+  body.priority = Date.now()
   let created = await Module.create(body)
   await initModule(created)
   ctx.body = {
@@ -437,9 +438,10 @@ router.get('/module/remove', async (ctx, next) => {
 })
 router.post('/module/sort', async (ctx) => {
   let { ids } = ctx.request.body
+  let counter = 1
   for (let index = 0; index < ids.length; index++) {
-    await Module.update({ priority: index + 1 }, {
-      where: { id: ids[index] },
+    await Module.update({ priority: counter++ }, {
+      where: { id: ids[index] }
     })
   }
   ctx.body = {
@@ -507,7 +509,7 @@ router.get('/interface/get', async (ctx) => {
 router.post('/interface/create', async (ctx, next) => {
   let creatorId = ctx.session.id
   let body = Object.assign(ctx.request.body, { creatorId })
-  body.priority = (await Interface.count()) + 1
+  body.priority = Date.now()
   let created = await Interface.create(body)
   // await initInterface(created)
   ctx.body = {
@@ -622,9 +624,10 @@ router.post('/interface/unlock', async (ctx, next) => {
 })
 router.post('/interface/sort', async (ctx) => {
   let { ids } = ctx.request.body
+  let counter = 1
   for (let index = 0; index < ids.length; index++) {
-    await Interface.update({ priority: index + 1 }, {
-      where: { id: ids[index] },
+    await Interface.update({ priority: counter++ }, {
+      where: { id: ids[index] }
     })
   }
   ctx.body = {
@@ -758,5 +761,24 @@ router.get('/property/remove', async (ctx) => {
     data: await Property.destroy({
       where: { id },
     }),
+  }
+})
+
+router.post('/repository/import', async (ctx) => {
+  if (!ctx.session || !ctx.session.id) {
+    ctx.body = {
+      isOk: false,
+      message: 'NOT LOGIN'
+    }
+    return
+  }
+  const { docUrl, orgId } = ctx.request.body
+  const result = await MigrateService.importRepoFromRAP1DocUrl(orgId, ctx.session.id, docUrl)
+  ctx.body = {
+    isOk: result,
+    message: result ? '导入成功' : '导入失败',
+    repository: {
+      id: 1,
+    }
   }
 })
