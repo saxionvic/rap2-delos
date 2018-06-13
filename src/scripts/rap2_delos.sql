@@ -318,3 +318,18 @@ CREATE TABLE `foreign_room` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2017-05-19 23:47:54
+
+
+
+
+
+ALTER TABLE Interfaces
+MODIFY priority BIGINT(11) NOT NULL DEFAULT 1;
+
+ALTER TABLE Properties
+MODIFY priority BIGINT(11) NOT NULL DEFAULT 1;
+
+ALTER TABLE Modules
+MODIFY priority BIGINT(11) NOT NULL DEFAULT 1;
+
+
