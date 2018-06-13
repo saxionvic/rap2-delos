@@ -3,49 +3,48 @@
 version: '2.2'
 
 services:
-#  delos:
-#    container_name: rap2-delos
-#    # build from ./Dockerfile
-#    build: .
-#    # build from images
-##    image: blackdog1987/rap2-delos:1.1.0
-#    environment:
-#      # if you have your own mysql, config it here, and disable the 'mysql' config blow
-#      - MYSQL_URL=rap2-mysql # links will maintain /etc/hosts, just use 'container_name'
-#      - MYSQL_PORT=3306
-#      - MYSQL_USERNAME=root
-#      - MYSQL_PASSWD=
-#      - MYSQL_SCHEMA=rap2
-#
-#      # redis config
-#      - REDIS_URL=rap2-redis
-#      - REDIS_PORT=6379
-#
-#      # production / development
-#      - NODE_ENV=production
-#    working_dir: /app
-#    privileged: true
-#    ###### 'sleep 30 && node scripts/init' will drop the tables
-#    ###### RUN ONLY ONCE THEN REMOVE 'sleep 30 && node scripts/init'
-##    command: /bin/sh -c 'sleep 30; node scripts/init; node dispatch.js'
-#    # init the databases
-##    command: sleep 30 && node scripts/init && node dispatch.js
-#    # without init
+  delos:
+    container_name: rap2-delos
+    # build from ./Dockerfile
+    build: .
+    # build from images
+    # image: blackdog1987/rap2-delos:1.1.3
+    # image: saxionvic/rap2-delos:1.2
+    environment:
+      # if you have your own mysql, config it here, and disable the 'mysql' config blow
+      - MYSQL_URL=rap2-mysql # links will maintain /etc/hosts, just use 'container_name'
+      - MYSQL_PORT=3306
+      - MYSQL_USERNAME=root
+      - MYSQL_PASSWD=
+      - MYSQL_SCHEMA=rap2
+
+      # redis config
+      - REDIS_URL=rap2-redis
+      - REDIS_PORT=6379
+
+      # production / development
+      - NODE_ENV=production
+    working_dir: /app
+    privileged: true
+    ###### 'sleep 30 && node scripts/init' will drop the tables
+    ###### RUN ONLY ONCE THEN REMOVE 'sleep 30 && node scripts/init'
+    command: /bin/sh -c 'sleep 30; node scripts/init; node dispatch.js'
+    # init the databases
+#    command: sleep 30 && node scripts/init && node dispatch.js
+    # without init
 #    command: node dispatch.js
-#    links:
-#      - redis
-#      - mysql
-#    depends_on:
-#      - redis
-#      - mysql
-#    ports:
-#      - "38080:8080"  # expose 38080
+    links:
+      - redis
+      - mysql
+    depends_on:
+      - redis
+      - mysql
+    ports:
+      - "38080:8080"  # expose 38080
 
   redis:
     container_name: rap2-redis
     image: redis:4.0.9
-    ports:
-      - "6379:6379"  # expose 6379
 
   # disable this if you have your own mysql
   mysql:
